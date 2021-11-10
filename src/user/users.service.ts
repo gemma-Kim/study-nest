@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
 import { User } from './entity/user.entity';
 import { UserRepository } from './entity/user.reposiory';
 
@@ -20,7 +21,7 @@ export class UserService {
     return await this.userRepository.findOne({ id });
   }
 
-  async updateUserInfo(id: number, updateData) {
+  async updateUserInfo(id: number, updateData: UpdateUserInfo) {
     const user = await this.userRepository.findOne({ id });
     console.log('user', user);
 

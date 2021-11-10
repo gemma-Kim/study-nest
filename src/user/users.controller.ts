@@ -13,6 +13,7 @@ import { User } from 'src/common/decorator/user.decorator';
 import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { JoinRequestDto } from './dto/join.request.dto';
+import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
 import { UserService } from './users.service';
 
 @UseInterceptors(UndefinedToNullInterceptor)
@@ -44,8 +45,14 @@ export class UsersController {
     return await this.userService.signIn(data.email, data.password);
   }
 
+  @ApiOperation({
+    summary: '회원정보 업데이트',
+  })
   @Patch(':id')
-  async updateUserInfo(@Param('id', ParseIntPipe) id: number, @Body() data) {
+  async updateUserInfo(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() data: UpdateUserInfo,
+  ) {
     return await this.userService.updateUserInfo(id, data);
   }
 
