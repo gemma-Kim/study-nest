@@ -14,6 +14,7 @@ import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { JoinRequestDto } from './dto/join.request.dto';
 import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
+import { Profile } from './entity/profile.entity';
 import { UserService } from './users.service';
 
 @UseInterceptors(UndefinedToNullInterceptor)
@@ -67,4 +68,17 @@ export class UsersController {
   })
   @Post('logout')
   logOut() {}
+
+  @Post(':userId/profile')
+  async addProfile(
+    @Param('userId', ParseIntPipe) userId: number,
+    @Body() profileData,
+  ) {
+    console.log('userId', userId);
+    const profile = new Profile();
+    profile.gender = profileData.gender;
+    profile.photo = profileData.photo;
+    profile.userId = profileData.userId;
+    return await this.userService.addNewProfile(userId, profileData);
+  }
 }
