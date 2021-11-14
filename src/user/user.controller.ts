@@ -13,9 +13,10 @@ import { User } from 'src/common/decorator/user.decorator';
 import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { JoinRequestDto } from './dto/join.request.dto';
+import { NewProfile } from './dto/newProfile.request.dto';
 import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
 import { Profile } from './entity/profile.entity';
-import { UserService } from './users.service';
+import { UserService } from './user.service';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags('user')
@@ -72,13 +73,8 @@ export class UsersController {
   @Post(':userId/profile')
   async addProfile(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() profileData,
+    @Body() profileData: NewProfile,
   ) {
-    console.log('userId', userId);
-    const profile = new Profile();
-    profile.gender = profileData.gender;
-    profile.photo = profileData.photo;
-    profile.userId = profileData.userId;
     return await this.userService.addNewProfile(userId, profileData);
   }
 }
