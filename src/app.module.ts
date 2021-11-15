@@ -1,7 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
-import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { UsersModule } from './user/users.module';
+import { LoggerMiddleware } from './middleware/logger.middleware';
+import { UserModule } from './user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection, getConnectionOptions } from 'typeorm';
 
@@ -19,7 +19,7 @@ import { Connection, getConnectionOptions } from 'typeorm';
         }),
     }),
 
-    UsersModule,
+    UserModule,
   ],
   controllers: [],
   providers: [],
