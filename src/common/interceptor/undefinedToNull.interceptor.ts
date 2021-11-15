@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 
 @Injectable()
-export class UndefinedToNullInterceptor implements NestInterceptor {
+export class UndefinedToNullInterceptor<T> implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler<T>) {
     return next.handle().pipe((data) => (data === undefined ? null : data));
   }
