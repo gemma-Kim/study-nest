@@ -13,10 +13,10 @@ export class Profile {
   id: number;
 
   @Column()
-  photo: string;
+  photo: string | null;
 
   @Column()
-  gender: string;
+  gender: 'WOMAN' | 'MAN' | null;
 
   @Column()
   createAt: string;
@@ -25,5 +25,5 @@ export class Profile {
   updateAt: string;
 
   @ManyToOne(() => User, (user) => user.profileId)
-  user: number;
+  userId: number;
 }

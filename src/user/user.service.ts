@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
-import { Profile } from './entity/profile.entity';
-import { ProfileRepository } from './entity/profile.repository';
+import { Profile } from '../profile/entity/profile.entity';
+import { ProfileRepository } from '../profile/repository/profile.repository';
 import { UserRepository } from './entity/user.reposiory';
 
 @Injectable()
@@ -10,8 +10,6 @@ export class UserService {
   constructor(
     @InjectRepository(UserRepository)
     private readonly userRepository: UserRepository,
-    @InjectRepository(ProfileRepository)
-    private readonly profileRepository: ProfileRepository,
   ) {}
 
   async signIn(email: string, password: string) {
@@ -39,22 +37,5 @@ export class UserService {
 
       return await this.userRepository.save(user);
     }
-  }
-
-  async addNewProfile(userId: number, profileData) {
-    console.log(userId, profileData);
-    console.log({
-      userId,
-      ...profileData,
-    });
-
-    const profile = new Profile();
-    profile.gender = profileData.gender;
-    profile.photo = profileData.photo;
-    profile.user = userId;
-    console.log('profile', profile);
-    const newProfile = await this.profileRepository.save(profile);
-    console.log('newProfile', newProfile);
-    return newProfile;
   }
 }
