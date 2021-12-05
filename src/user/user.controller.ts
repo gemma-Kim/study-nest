@@ -10,21 +10,18 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/common/decorator/user.decorator';
-import { UserDto } from 'src/common/dto/user.dto';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { JoinRequestDto } from './dto/join.request.dto';
-import { NewProfile } from './dto/newProfile.request.dto';
 import { UpdateUserInfo } from './dto/updateUserInfo.request.dto';
-import { Profile } from './entity/profile.entity';
+import { Profile } from '../profile/entity/profile.entity';
 import { UserService } from './user.service';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags('user')
 @Controller('user')
-export class UsersController {
+export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  @ApiResponse({ status: 200, type: UserDto })
   @ApiOperation({
     summary: '내 정보 조회',
     description: '조심하십시오',
@@ -69,12 +66,4 @@ export class UsersController {
   })
   @Post('logout')
   logOut() {}
-
-  @Post(':userId/profile')
-  async addProfile(
-    @Param('userId', ParseIntPipe) userId: number,
-    @Body() profileData: NewProfile,
-  ) {
-    return await this.userService.addNewProfile(userId, profileData);
-  }
 }

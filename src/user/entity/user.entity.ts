@@ -6,7 +6,7 @@ import {
   OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-import { Profile } from './profile.entity';
+import { Profile } from '../../profile/entity/profile.entity';
 
 @Entity('user')
 export class User {
