@@ -19,6 +19,6 @@ export class ProfileController {
   async getProfile(
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<NewProfileResponseDto> {
-    return await this.profileService.getUserProfile(userId);
+    return await this.profileService.getProfile(userId);
   }
 }

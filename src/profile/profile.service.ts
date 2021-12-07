@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { UserRepository } from 'src/user/entity/user.reposiory';
 import { NewProfileResponseDto } from './dto/getProfile.response.dto';
 import { NewProfileRequestDto } from './dto/newProfile.request.dto';
 import { Profile } from './entity/profile.entity';
@@ -10,9 +11,16 @@ export class ProfileService {
   constructor(
     @InjectRepository(ProfileRepository)
     private readonly profileRepository: ProfileRepository,
+    @InjectRepository(UserRepository)
+    private readonly userRepository: UserRepository,
   ) {}
 
-  async getUserProfile(userId: number): Promise<NewProfileResponseDto> {
+  async getProfile(userId: number): Promise<NewProfileResponseDto> {
+    const user = await this.userRepository.findUser(userId);
+
+    if (!user) {
+      throw new NotFoundException();
+    }
     const profile = await this.profileRepository.getUserProfile(userId);
 
     const userProfile: NewProfileResponseDto = {
@@ -26,18 +34,15 @@ export class ProfileService {
   }
 
   async addNewProfile(userId: number, profileData) {
-    // console.log(userId, profileData);
-    // console.log({
-    //   userId,
-    //   ...profileData,
-    // });
-    // const profile = new Profile();
-    // profile.gender = profileData.gender;
-    // profile.photo = profileData.photo;
-    // profile.user = userId;
-    // console.log('profile', profile);
-    // const newProfile = await this.profileRepository.save(profile);
-    // console.log('newProfile', newProfile);
-    // return newProfile;
+    const profile = new Profile();
+    profile.gender = profileData.gender;
+    profile.photo = profileData.photo;
+    profile.userId = userId;
+
+    const newProfile = await this.profileRepository.addNewProfile(profile);
+
+    return newProfile;
   }
+
+  async save(profile) {}
 }

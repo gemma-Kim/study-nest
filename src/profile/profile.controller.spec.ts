@@ -5,9 +5,11 @@ import { ProfileRepository } from './repository/profile.repository';
 import * as faker from 'faker';
 import { NewProfileRequestDto } from './dto/newProfile.request.dto';
 import { NewProfileResponseDto } from './dto/getProfile.response.dto';
+import { UserRepository } from 'src/user/entity/user.reposiory';
 describe('ProfileController', () => {
+  const userRepository = new UserRepository();
   const profileRepository = new ProfileRepository();
-  const service = new ProfileService(profileRepository);
+  const service = new ProfileService(profileRepository, userRepository);
   const controller = new ProfileController(service);
 
   // beforeEach(async () => {
@@ -24,6 +26,7 @@ describe('ProfileController', () => {
 });
 
 describe('getProfile', () => {
+  let userRepository: UserRepository;
   let profileRepository: ProfileRepository;
   let service: ProfileService;
   let controller: ProfileController;
@@ -35,8 +38,9 @@ describe('getProfile', () => {
   const gender: 'MAN' | 'WOMAN' = faker.random.arrayElement(['MAN', 'WOMAN']);
 
   beforeEach(() => {
+    userRepository = new UserRepository();
     profileRepository = new ProfileRepository();
-    service = new ProfileService(profileRepository);
+    service = new ProfileService(profileRepository, userRepository);
     controller = new ProfileController(service);
 
     getUserProfileMockFn = jest

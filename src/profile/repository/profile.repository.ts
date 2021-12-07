@@ -6,10 +6,12 @@ import { NewProfileRequestDto } from '../dto/newProfile.request.dto';
 @EntityRepository(Profile)
 export class ProfileRepository extends Repository<Profile> {
   async getProfile(profileData: getProfileDto): Promise<Profile[]> {
-    return this.find({ where: profileData });
+    return await this.find({ where: profileData });
   }
 
   async getUserProfile(userId: number): Promise<Profile> {
-    return this.findOne(userId);
+    return await this.findOne({ where: { userId } });
   }
+
+  async addNewProfile(newProfile) {}
 }

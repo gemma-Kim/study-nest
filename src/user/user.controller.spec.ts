@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { getRepositoryToken, TypeOrmModule } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Profile } from './entity/profile.entity';
-import { ProfileRepository } from './entity/profile.repository';
+import { Profile } from '../profile/entity/profile.entity';
+import { ProfileRepository } from '../profile/repository/profile.repository';
 import { User } from './entity/user.entity';
 import { UserRepository } from './entity/user.reposiory';
 import { UserController } from './user.controller';
@@ -24,13 +24,5 @@ describe('UsersController', () => {
 
   it('should be defined', () => {
     expect(controller).toBeDefined();
-  });
-
-  it('getUserProfile method should be defined', () => {
-    expect(controller.getProfile).toBeDefined();
-  });
-
-  it('getUserProfile method should be defined', () => {
-    expect(controller.getProfile).toBeDefined();
   });
 });
