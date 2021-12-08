@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/user/entity/user.reposiory';
 import { NewProfileResponseDto } from './dto/getProfile.response.dto';
@@ -40,9 +44,15 @@ export class ProfileService {
     profile.userId = userId;
 
     const newProfile = await this.profileRepository.addNewProfile(profile);
-
+    console.log('aaaaaaa2');
     return newProfile;
   }
 
-  async save(profile) {}
+  async updateUserProfile(data) {
+    if (!data.userId) {
+      throw new BadRequestException();
+    }
+    await this.userRepository.saveUser(data);
+    await this.profileRepository.addNewProfile(data);
+  }
 }

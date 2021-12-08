@@ -13,5 +13,8 @@ export class ProfileRepository extends Repository<Profile> {
     return await this.findOne({ where: { userId } });
   }
 
-  async addNewProfile(newProfile) {}
+  async addNewProfile(newProfile: Profile): Promise<Profile> {
+    console.log('aaaa');
+    return await this.save(newProfile);
+  }
 }
