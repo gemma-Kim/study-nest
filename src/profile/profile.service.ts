@@ -5,8 +5,13 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from 'src/user/entity/user.reposiory';
+import { EntityManager, getConnection } from 'typeorm';
 import { NewProfileResponseDto } from './dto/getProfile.response.dto';
 import { NewProfileRequestDto } from './dto/newProfile.request.dto';
+import {
+  addNewProfileDto,
+  UpdateUserProfileDto,
+} from './dto/updateUserProfile.dto';
 import { Profile } from './entity/profile.entity';
 import { ProfileRepository } from './repository/profile.repository';
 
@@ -48,11 +53,50 @@ export class ProfileService {
     return newProfile;
   }
 
-  async updateUserProfile(data) {
-    if (!data.userId) {
-      throw new BadRequestException();
+  async updateUserProfile(profileId: number, data: UpdateUserProfileDto) {
+    try {
+      if (!profileId) {
+        throw new BadRequestException();
+      }
+
+      const result = await getConnection()
+        .transaction(async (entityManager: EntityManager) => {
+          let newUserData;
+          let addedProfileData;
+
+          if (data.email) {
+            const email = data.email;
+            newUserData = await this.userRepository.saveUser(
+              { email, id: 1 },
+              entityManager,
+            );
+          }
+
+          if (data.photo || data.gender) {
+            const newProfile: addNewProfileDto = {};
+            if (data.photo) newProfile.photo = data.photo;
+            if (data.gender) newProfile.gender = data.gender;
+            addedProfileData = await this.profileRepository.updateProfile(
+              entityManager,
+              profileId,
+              newProfile,
+            );
+          }
+          console.log('addedProfileData', addedProfileData);
+          return { ...newUserData, ...addedProfileData };
+        })
+        .then((trxResult) => {
+          return trxResult;
+        })
+        .catch((err) => {
+          throw err;
+        });
+
+      console.log('후', result);
+
+      return result;
+    } catch (err) {
+      throw err;
     }
-    await this.userRepository.saveUser(data);
-    await this.profileRepository.addNewProfile(data);
   }
 }

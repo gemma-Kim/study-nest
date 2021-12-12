@@ -1,6 +1,14 @@
-import { Body, Controller, Param, ParseIntPipe, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+} from '@nestjs/common';
 import { NewProfileResponseDto } from './dto/getProfile.response.dto';
 import { NewProfileRequestDto } from './dto/newProfile.request.dto';
+import { RequestUpdateProfileDto } from './dto/updateUserProfile.dto';
 import { Profile } from './entity/profile.entity';
 import { ProfileService } from './profile.service';
 
@@ -20,5 +28,13 @@ export class ProfileController {
     @Param('userId', ParseIntPipe) userId: number,
   ): Promise<NewProfileResponseDto> {
     return await this.profileService.getProfile(userId);
+  }
+
+  @Patch(':profileId')
+  async updateProfile(
+    @Body() data: RequestUpdateProfileDto,
+    @Param('profileId', ParseIntPipe) profileId: number,
+  ) {
+    return await this.profileService.updateUserProfile(profileId, data);
   }
 }

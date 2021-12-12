@@ -27,8 +27,8 @@ const mockUserRepository = () => ({
 
 beforeEach(async () => {
   const module: TestingModule = await Test.createTestingModule({
+    controllers: [ProfileController],
     providers: [
-      ProfileController,
       ProfileService,
       ProfileRepository,
       UserRepository,
@@ -99,7 +99,7 @@ describe('addNewProfile', () => {
       .spyOn(profileRepository, 'addNewProfile')
       .mockResolvedValue(mockResult);
 
-    await service.addNewProfile(userId, mockResult);
+    await profileRepository.addNewProfile(mockResult);
 
     expect(mockAddNewProfile).toHaveBeenCalledTimes(1);
     expect(mockAddNewProfile).toHaveBeenCalled();
@@ -140,7 +140,7 @@ describe('updateUserProfile', () => {
 
     jest.spyOn(userRepository, 'saveUser').mockResolvedValue(mockResult);
 
-    await service.updateUserProfile(mockResult);
+    await service.updateUserProfile(1, mockResult);
 
     expect(mockUpdateProfile).toHaveBeenCalled();
   });
@@ -154,7 +154,7 @@ describe('updateUserProfile', () => {
       .spyOn(profileRepository, 'addNewProfile')
       .mockResolvedValue(mockResult);
 
-    await service.updateUserProfile(mockResult);
+    await service.updateUserProfile(1, mockResult);
 
     expect(mockSaveUser).toHaveBeenCalled();
   });
@@ -166,9 +166,23 @@ describe('updateUserProfile', () => {
 
     jest.spyOn(service, 'updateUserProfile');
 
-    await service.updateUserProfile({ userId }).catch(() => {
-      expect(mockSaveUser).not.toHaveBeenCalled();
-      expect(mockUpdateProfile).not.toHaveBeenCalled();
+    // await service.updateUserProfile({ userId }).catch(() => {
+    //   expect(mockSaveUser).not.toHaveBeenCalled();
+    //   expect(mockUpdateProfile).not.toHaveBeenCalled();
+    // });
+  });
+
+  it('should not call updateProfile of profileRepository when saveUser method happends error', async () => {
+    jest.spyOn(userRepository, 'saveUser').mockRejectedValue(new Error());
+    jest.spyOn(service, 'updateUserProfile');
+
+    const mockUpdateProfileRepo = jest.spyOn(
+      profileRepository,
+      'updateProfile',
+    );
+
+    await service.updateUserProfile(1, mockResult).catch((result) => {
+      expect(mockUpdateProfileRepo).not.toHaveBeenCalled();
     });
   });
 });
