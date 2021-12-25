@@ -12,7 +12,7 @@ import {
   addNewProfileDto,
   UpdateUserProfileDto,
 } from './dto/updateUserProfile.dto';
-import { Profile } from './entity/profile.entity';
+import { Profile, UserProfile } from './domain/profile.domain';
 import { ProfileRepository } from './repository/profile.repository';
 
 @Injectable()
@@ -24,36 +24,33 @@ export class ProfileService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async getProfile(userId: number): Promise<NewProfileResponseDto> {
+  async exists(profieId: number) {
+    const profile = await this.profileRepository.getOneById(profieId);
+    if (!profile) {
+      throw new NotFoundException('PROFILE_DOEST_NOT_EXIST');
+    }
+  }
+
+  async getProfile(userId: number) {
+    //: Promise<NewProfileResponseDto> {
     const user = await this.userRepository.findUser(userId);
 
     if (!user) {
       throw new NotFoundException();
     }
-    const profile = await this.profileRepository.getUserProfile(userId);
+    //const profile =  getUserProfile(userId);
 
-    const userProfile: NewProfileResponseDto = {
-      id: profile.id,
-      userId: profile.userId,
-      photo: profile.photo,
-      gender: profile.gender,
-    };
+    // const userProfile: NewProfileResponseDto = {
+    //   id: profile.id,
+    //   userId: profile.userId,
+    //   photo: profile.photo,
+    //   gender: profile.gender,
+    // };
 
-    return userProfile;
+    // return userProfile;
   }
 
-  async addNewProfile(userId: number, profileData) {
-    const profile = new Profile();
-    profile.gender = profileData.gender;
-    profile.photo = profileData.photo;
-    profile.userId = userId;
-
-    const newProfile = await this.profileRepository.addNewProfile(profile);
-    console.log('aaaaaaa2');
-    return newProfile;
-  }
-
-  async updateUserProfile(profileId: number, data: UpdateUserProfileDto) {
+  async updateProfile(profileId: number, data: UpdateUserProfileDto) {
     try {
       if (!profileId) {
         throw new BadRequestException();

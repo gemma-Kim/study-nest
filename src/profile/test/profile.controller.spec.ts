@@ -10,7 +10,7 @@ describe('ProfileController', () => {
   const userRepository = new UserRepository();
   const profileRepository = new ProfileRepository();
   const service = new ProfileService(profileRepository, userRepository);
-  const controller = new ProfileController(service);
+  const controller = new ProfileController(service, profileRepository);
 
   // beforeEach(async () => {
   //   const module: TestingModule = await Test.createTestingModule({
@@ -41,7 +41,7 @@ describe('getProfile', () => {
     userRepository = new UserRepository();
     profileRepository = new ProfileRepository();
     service = new ProfileService(profileRepository, userRepository);
-    controller = new ProfileController(service);
+    controller = new ProfileController(service, profileRepository);
 
     getUserProfileMockFn = jest
       .spyOn(controller, 'getProfile')

@@ -5,11 +5,11 @@ import * as faker from 'faker';
 import { User } from 'src/user/entity/user.entity';
 import { UserRepository } from 'src/user/entity/user.reposiory';
 import { Repository } from 'typeorm';
-import { NewProfileResponseDto } from './dto/getProfile.response.dto';
-import { Profile } from './entity/profile.entity';
-import { ProfileController } from './profile.controller';
-import { ProfileService } from './profile.service';
-import { ProfileRepository } from './repository/profile.repository';
+import { NewProfileResponseDto } from '../dto/getProfile.response.dto';
+import { Profile } from '../entity/profile.entity';
+import { ProfileController } from '../application/profile.controller';
+import { ProfileService } from '../application/profile.service';
+import { ProfileRepository } from '../repository/profile.repository';
 
 let service: ProfileService;
 let profileRepository: ProfileRepository;
