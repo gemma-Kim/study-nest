@@ -20,7 +20,7 @@ export class ProfileRepository extends Repository<Profile> {
     return await this.findOne({ where: { userId } });
   }
 
-  async addNewProfile(
+  async createNewProfile(
     newProfile,
     entityManger?: EntityManager,
   ): Promise<Profile> {
@@ -41,5 +41,9 @@ export class ProfileRepository extends Repository<Profile> {
       .set(updateDto)
       .where('profile.id = :id', { id: profileId })
       .execute();
+  }
+
+  async getOneById(profileId: number): Promise<Profile> {
+    return await this.findOne(profileId);
   }
 }

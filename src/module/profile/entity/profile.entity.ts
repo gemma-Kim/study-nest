@@ -1,6 +1,8 @@
 import {
   Column,
   Entity,
+  JoinColumn,
+  ManyToMany,
   ManyToOne,
   OneToOne,
   PrimaryGeneratedColumn,
@@ -24,6 +26,8 @@ export class Profile {
   @Column()
   updateAt: string;
 
+  @Column()
+  @JoinColumn({ name: 'userId', referencedColumnName: 'id' })
   @ManyToOne(() => User, (user) => user.profileId)
   userId: number;
 }

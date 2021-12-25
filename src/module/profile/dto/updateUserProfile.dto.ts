@@ -1,8 +1,7 @@
 import { IsEnum, IsInt, IsString } from 'class-validator';
-import { Profile } from '../entity/profile.entity';
 
-const gender = ['WOMAN', 'MAN'] as const;
-type genderType = typeof gender[number];
+export const genderTypeList = ['WOMAN', 'MAN'] as const;
+export type genderType = typeof genderTypeList[number];
 
 export class UpdateUserProfileDto {
   @IsString()
@@ -11,7 +10,7 @@ export class UpdateUserProfileDto {
   @IsString()
   photo?: string;
 
-  @IsEnum(gender)
+  @IsEnum(genderTypeList)
   gender?: genderType;
 }
 
@@ -19,17 +18,14 @@ export class addNewProfileDto {
   @IsString()
   photo?: string;
 
-  @IsEnum(gender)
+  @IsEnum(genderTypeList)
   gender?: genderType;
 }
 
 export class RequestUpdateProfileDto {
   @IsString()
-  email?: string;
-
-  @IsString()
   photo?: string;
 
-  @IsEnum(gender)
+  @IsEnum(genderTypeList)
   gender?: genderType;
 }

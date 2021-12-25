@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   UseInterceptors,
+  ValidationPipe,
 } from '@nestjs/common';
 import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { User } from 'src/common/decorator/user.decorator';
