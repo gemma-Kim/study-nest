@@ -11,4 +11,7 @@ export class JoinRequestDto extends OmitType(User, ['id']) {
 
   @ApiProperty({ example: '12345678', description: '비밀번호', required: true })
   public password: string;
+
+  @ApiProperty({ example: '12345678', description: '닉네임', required: true })
+  public nickname: string;
 }

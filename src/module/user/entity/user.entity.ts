@@ -1,11 +1,4 @@
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Profile } from '../../profile/entity/profile.entity';
 
 @Entity('user')
@@ -15,6 +8,9 @@ export class User {
 
   @Column()
   email: string;
+
+  @Column()
+  nickname: string;
 
   @Column()
   password: string;

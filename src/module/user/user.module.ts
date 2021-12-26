@@ -6,6 +6,7 @@ import { UserRepository } from './entity/user.reposiory';
 import { ProfileRepository } from '../profile/repository/profile.repository';
 
 @Module({
+  exports: [UserService],
   imports: [TypeOrmModule.forFeature([UserRepository, ProfileRepository])],
   providers: [UserService],
   controllers: [UserController],
