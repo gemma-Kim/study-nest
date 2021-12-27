@@ -1,10 +1,11 @@
 import * as bcrypt from 'bcrypt';
 
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from '../entity/user.reposiory';
 import { JoinResponseDto } from '../dto/user.response.dto';
 import { User } from '../domain/user.domain';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class UserService {
@@ -15,6 +16,16 @@ export class UserService {
 
   async findOne(email: string) {
     return this.userRepository.findOne({ where: { email } });
+  }
+
+  async exist(user: User) {
+    const foundUser = this.userRepository.findOne({
+      where: { email: user.email },
+    });
+
+    if (!foundUser) {
+      throw new NotFoundException('NOT_FOUND_USER');
+    }
   }
 
   async signUp(userData: User) {
