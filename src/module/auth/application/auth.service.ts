@@ -1,5 +1,5 @@
 import { JwtService } from '@nestjs/jwt';
-import { compare } from 'bcrypt';
+import { genSalt, hash, compare } from 'bcrypt';
 import { UserService } from '../../user/application/user.service';
 import { AuthPayload } from '../dto/auth.payload.dto';
 import { Email, Password } from 'src/module/user/domain/user.domain';
@@ -18,6 +18,12 @@ export class AuthService {
     };
 
     return new AccessToken(this.jwtService.sign(payload));
+  }
+
+  async hashPassword(password: Password) {
+    const saltRounds: number = Number(process.env.SALT_ROUNDS);
+    const salt = await genSalt(saltRounds);
+    return hash(password.value, salt);
   }
 
   async validate(accessToken: AccessToken) {
