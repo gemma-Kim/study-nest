@@ -1,4 +1,11 @@
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 import { Profile } from '../../profile/entity/profile.entity';
 
 @Entity('user')
@@ -15,10 +22,10 @@ export class User {
   @Column()
   password: string;
 
-  @Column()
+  @CreateDateColumn()
   createAt: string;
 
-  @Column()
+  @UpdateDateColumn()
   updateAt: string;
 
   @OneToMany(() => User, (user) => user.profileId)
