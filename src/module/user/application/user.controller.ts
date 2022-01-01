@@ -8,11 +8,16 @@ import {
 } from '@nestjs/common';
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
-import { JoinRequestDto } from '../dto/join.request.dto';
 import { UserService } from './user.service';
-import { Email, Nickname, Password, User } from '../domain/user.domain';
+import {
+  Email,
+  HashedPassword,
+  Nickname,
+  Password,
+  User,
+} from '../domain/user.domain';
 import { JoinResponseDto } from '../dto/user.response.dto';
-import { LogInRequestDto } from '../dto/user.request.dto';
+import { LogInRequestDto, SignUpRequestDto } from '../dto/user.request.dto';
 import { AuthService } from 'src/module/auth/application/auth.service';
 import { UserRepository } from '../entity/user.reposiory';
 import { AuthPayload } from 'src/module/auth/dto/auth.payload.dto';
@@ -31,24 +36,25 @@ export class UserController {
     summary: '회원가입',
   })
   @Post('signUp')
-  async signUp(@Body() data: JoinRequestDto): Promise<JoinResponseDto> {
+  async signUp(@Body() data: SignUpRequestDto): Promise<JoinResponseDto> {
     const user = new User(
       new Email(data.email),
       new Password(data.password),
       new Nickname(data.nickname),
     );
     const foundUser = await this.userService.exists(user);
+
     if (foundUser) {
-      throw new BadRequestException('이미 존재하는 사용자 이메일 혹은 닉네임');
+      throw new BadRequestException('DUPLICATED_EMAIL_OR_NICKNAME');
     }
 
-    const hashedPassword = this.authService.hashPassword(
-      new Password(user.password),
+    const hashedPassword = new HashedPassword(
+      await this.authService.hashPassword(new Password(user.password)),
     );
 
     const signUpedNewUser = await this.userRepository.saveUser({
       email: user.email,
-      password: hashedPassword,
+      password: hashedPassword.value,
       nickname: user.nickname,
     });
 
