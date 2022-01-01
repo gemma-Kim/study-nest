@@ -1,9 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserRepository } from '../entity/user.reposiory';
-import { JoinResponseDto } from '../dto/user.response.dto';
-import { Nickname, Password, User } from '../domain/user.domain';
-import { AuthService } from 'src/module/auth/application/auth.service';
+import { User } from '../domain/user.domain';
 
 @Injectable()
 export class UserService {
@@ -14,7 +12,11 @@ export class UserService {
 
   async exists(user: User) {
     return this.userRepository.findOne({
-      where: user,
+      where: [
+        { id: user.id },
+        { nickname: user.nickname },
+        { email: user.email },
+      ],
     });
   }
 }
