@@ -69,3 +69,16 @@ export class User {
     this.nickname = nickname.value;
   }
 }
+
+export class LoginUser {
+  email: string;
+  password: string;
+
+  constructor(email: Email, password: Password) {
+    if (!email) throw new NotAcceptableException('INVALID_EMAIL');
+    if (!password) throw new NotAcceptableException('INVALID_PASSWORD');
+
+    this.email = email.value;
+    this.password = password.value;
+  }
+}
