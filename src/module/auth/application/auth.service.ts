@@ -1,17 +1,15 @@
-import { JwtService } from '@nestjs/jwt';
 import { genSalt, hash, compare } from 'bcrypt';
-import { UserService } from '../../user/application/user.service';
 import { AuthPayload } from '../dto/auth.payload.dto';
-import { Email, Password } from 'src/module/user/domain/user.domain';
+import { Password } from 'src/module/user/domain/user.domain';
 import { AccessToken } from '../domain/auth.domain';
+import { JwtService } from '@nestjs/jwt';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class AuthService {
-  constructor(
-    private readonly userService: UserService,
-    private readonly jwtService: JwtService,
-  ) {}
+  constructor(private jwtService: JwtService) {}
 
-  async generateAccessToken(payloadData: AuthPayload) {
+  generateAccessToken(payloadData: AuthPayload) {
     const payload = {
       userId: payloadData.id,
       email: payloadData.email,
@@ -26,8 +24,8 @@ export class AuthService {
     return hash(password.value, salt);
   }
 
-  async validate(accessToken: AccessToken) {
-    await this.jwtService.verify(accessToken.value);
+  async validate(tokenData: AccessToken) {
+    await this.jwtService.verify(tokenData.accessToken);
   }
 
   async validatePassword(notSurePassword: Password, validPassword: Password) {

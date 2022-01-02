@@ -1,6 +1,6 @@
 export class AccessToken {
-  value: string;
+  accessToken: string;
   constructor(data: string) {
-    this.value = data;
+    this.accessToken = data;
   }
 }

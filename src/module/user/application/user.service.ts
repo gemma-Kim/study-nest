@@ -10,13 +10,15 @@ export class UserService {
     private readonly userRepository: UserRepository,
   ) {}
 
-  async exists(user: User) {
+  async exists(userData) {
+    let where = [];
+
+    if (userData.id) where.push({ id: userData.id });
+    if (userData.nickname) where.push({ nickname: userData.nickname });
+    if (userData.email) where.push({ email: userData.email });
+
     return this.userRepository.findOne({
-      where: [
-        { id: user.id },
-        { nickname: user.nickname },
-        { email: user.email },
-      ],
+      where,
     });
   }
 }

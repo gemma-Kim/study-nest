@@ -12,6 +12,7 @@ import { UserService } from './user.service';
 import {
   Email,
   HashedPassword,
+  LoginUser,
   Nickname,
   Password,
   User,
@@ -63,19 +64,16 @@ export class UserController {
 
   @Post('login')
   async logIn(@Body() data: LogInRequestDto) {
-    const userData: User = await this.userRepository.findOne({
-      email: data.email,
-    });
-
-    if (!userData) {
-      throw new NotFoundException();
-    }
-
-    const user = new User(
-      new Email(userData.email),
-      new Password(userData.password),
-      new Nickname(userData.nickname),
+    const loginUser = new LoginUser(
+      new Email(data.email),
+      new Password(data.password),
     );
+
+    const user = await this.userService.exists(loginUser);
+
+    if (!user) {
+      throw new NotFoundException('DOES_NOT_EXIST_USER');
+    }
 
     await this.authService.validatePassword(
       new Password(data.password),
