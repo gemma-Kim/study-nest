@@ -1,16 +1,11 @@
-import {
-  MiddlewareConsumer,
-  Module,
-  NestModule,
-  ValidationPipe,
-} from '@nestjs/common';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { LoggerMiddleware } from './middleware/logger.middleware';
-import { UserModule } from 'src/user/user.module';
+import { UserModule } from 'src/module/user/user.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Connection, getConnectionOptions } from 'typeorm';
-import { ProfileModule } from './profile/profile.module';
-import { APP_PIPE } from '@nestjs/core';
+import { ProfileModule } from './module/profile/profile.module';
+import { AuthModule } from './module/auth/auth.module';
 
 @Module({
   imports: [
@@ -19,6 +14,7 @@ import { APP_PIPE } from '@nestjs/core';
       envFilePath: `.env.${process.env.NODE_ENV}`,
       ignoreEnvFile: process.env.NODE_ENV === 'prod',
     }),
+
     TypeOrmModule.forRootAsync({
       useFactory: async () =>
         Object.assign(await getConnectionOptions(), {
@@ -28,6 +24,7 @@ import { APP_PIPE } from '@nestjs/core';
 
     UserModule,
     ProfileModule,
+    AuthModule,
   ],
   controllers: [],
   providers: [],
