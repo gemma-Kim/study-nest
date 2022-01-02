@@ -3,7 +3,7 @@ import { AuthPayload } from '../dto/auth.payload.dto';
 import { Password } from 'src/module/user/domain/user.domain';
 import { AccessToken } from '../domain/auth.domain';
 import { JwtService } from '@nestjs/jwt';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
@@ -29,6 +29,9 @@ export class AuthService {
   }
 
   async validatePassword(notSurePassword: Password, validPassword: Password) {
-    return compare(notSurePassword.value, validPassword.value);
+    const passwordIsSame = compare(notSurePassword.value, validPassword.value);
+    if (!passwordIsSame) {
+      throw new BadRequestException('WRONG_PASSWORD');
+    }
   }
 }
