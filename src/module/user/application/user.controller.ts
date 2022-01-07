@@ -18,7 +18,6 @@ import {
   Nickname,
   Password,
   SignupUser,
-  User,
 } from '../domain/user.domain';
 import {
   JoinResponseDto,
@@ -33,6 +32,7 @@ import { AuthService } from 'src/module/auth/application/auth.service';
 import { UserRepository } from '../repository/user.reposiory';
 import { AuthPayload } from 'src/module/auth/dto/auth.payload.dto';
 import { AccessToken } from 'src/module/auth/domain/auth.domain';
+import { UserUpadateCommand } from '../command/user.command';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags('user')
@@ -64,18 +64,13 @@ export class UserController {
       await this.authService.hashPassword(new Password(user.password)),
     );
 
-    const signUpedUser = await this.userRepository.Save({
+    const signUpedUser = await this.userRepository.Create({
       email: user.email,
       password: hashedPassword.value,
       nickname: user.nickname,
     });
 
-    return new JoinResponseDto(
-      signUpedUser.id,
-      signUpedUser.email,
-      signUpedUser.nickname,
-      signUpedUser.createAt,
-    );
+    return new JoinResponseDto(signUpedUser);
   }
 
   @ApiOperation({
@@ -112,33 +107,17 @@ export class UserController {
   })
   @Patch(':userId')
   async updateUserInfo(
-    @Body() data: UpdateUserInfoRequestDto,
-    @Param() userId: number,
+    @Body() updateData: UpdateUserInfoRequestDto,
+    @Param('userId') userId: number,
   ): Promise<updateUserInfoResponseDto> {
-    const userData = await this.userService.exists({ id: userId });
-    if (!userData) {
+    const user = await this.userService.exists({ id: userId });
+    if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
 
-    const user = new User(
-      userData.id,
-      new Email(userData.email),
-      new Password(userData.password),
-      new Nickname(userData.nickname),
+    const updatedUser = await this.userRepository.Update(
+      new UserUpadateCommand(user.id, updateData),
     );
-
-    if (data.email) user.changeEmail(data.email);
-    if (data.nickname) user.changeNickname(data.nickname);
-    if (data.password) {
-      user.changePassword(
-        new HashedPassword(
-          await this.authService.hashPassword(new Password(data.password)),
-        ).value,
-      );
-    }
-
-    const updatedUser = await this.userRepository.Save(user);
-
     return new updateUserInfoResponseDto(updatedUser);
   }
 }
