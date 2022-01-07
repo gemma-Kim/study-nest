@@ -1,4 +1,4 @@
-import { IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 
 export class SignUpRequestDto {
   @IsString()
@@ -21,18 +21,31 @@ export class LogInRequestDto {
 
 import { ApiProperty } from '@nestjs/swagger';
 
-export class UpdateUserInfo {
+export class UpdateUserInfoRequestDto {
   @ApiProperty({
     example: 'email123@naver.com',
     description: '이메일',
     required: false,
   })
-  public email: string;
+  @IsOptional()
+  @IsString()
+  public email?: string;
 
   @ApiProperty({
     example: '12345678',
     description: '비밀번호',
     required: false,
   })
-  public password: string;
+  @IsOptional()
+  @IsString()
+  public password?: string;
+
+  @ApiProperty({
+    example: '헬로젬마',
+    description: '닉네임',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  public nickname?: string;
 }
