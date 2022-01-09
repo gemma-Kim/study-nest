@@ -1,23 +1,22 @@
+import { BadRequestException } from '@nestjs/common';
 import { Email, Nickname, Password } from '../domain/user.domain';
+import { UpdateUserInfoRequestDto } from '../dto/user.request.dto';
 
 export class UserUpadateCommand {
-  id: number;
-  _email: string;
-  _nickname: string;
-  _password: string;
-  constructor(id: number) {
-    this.id = id;
-  }
+  readonly id: number;
+  readonly email: string;
+  readonly nickname: string;
+  readonly password: string;
 
-  set email(theEmail) {
-    this.email = new Email(theEmail).value;
-  }
+  constructor(data) {
+    if (!data.id) throw new BadRequestException('DOES_NOT_EXIST_USER_ID');
+    if (!data.email && !data.nickname && !data.password) {
+      throw new BadRequestException('DOES_NOT_EXIST_UPDATE_DATA');
+    }
 
-  set nickname(theNickname: string) {
-    this._nickname = new Nickname(theNickname).value;
-  }
-
-  set password(thePassword: string) {
-    this.password = new Password(thePassword).value;
+    this.id = data.id;
+    if (data.email) this.email = new Email(data.email).value;
+    if (data.nickname) this.nickname = new Nickname(data.nickname).value;
+    if (data.password) this.password = new Password(data.password).value;
   }
 }

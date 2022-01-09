@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { UserService } from './application/user.service';
 import { UserController } from './application/user.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { UserRepository } from './entity/user.reposiory';
+import { UserRepository } from './repository/user.reposiory';
 import { ProfileRepository } from '../profile/repository/profile.repository';
 import { AuthModule } from '../auth/auth.module';
+import { UserService } from './domain/user.service';
 
 @Module({
   exports: [],

@@ -1,7 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../entity/user.entity';
 import { IUserRepository, UserRepository } from '../repository/user.reposiory';
-import { User } from './user.domain';
+import { HashedPassword, Password } from './user.domain';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -10,13 +12,19 @@ export class UserService {
     private readonly userRepository: IUserRepository,
   ) {}
 
-  async exists(user: User) {
-    return this.userRepository.Find({
+  async exists(userData): Promise<User> {
+    return await this.userRepository.Find({
       where: [
-        { id: user.id },
-        { email: user.email },
-        { nickname: user.nickname },
+        { id: userData.id },
+        { email: userData.email },
+        { nickname: userData.nickname },
       ],
     });
+  }
+
+  async hashPassword(password: Password): Promise<string> {
+    const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUNDS));
+    const pwValue = password.value;
+    return new HashedPassword(await bcrypt.hash(pwValue, salt)).value;
   }
 }

@@ -1,4 +1,5 @@
 import { NotAcceptableException } from '@nestjs/common';
+import * as bcrypt from 'bcrypt';
 
 export class Email {
   readonly value: string;
@@ -45,7 +46,6 @@ export class HashedPassword {
 
   constructor(value: string) {
     if (!value || (value && value.length > 101)) {
-      console.log(value.length);
       throw new NotAcceptableException('INVALID_PASSWORD');
     }
 
@@ -53,11 +53,35 @@ export class HashedPassword {
   }
 }
 
-export class User {
-  id: number;
+// TODO: User entity 화 시키기
+// export class User {
+//   readonly id: number;
+//   protected readonly email: string;
+//   protected readonly nickname: string;
+//   protected readonly password: string;
+
+//   constructor(
+//     id: number,
+//     email: Email,
+//     password: Password,
+//     nickname: Nickname,
+//   ) {
+//     if (!id) throw new NotAcceptableException('INVALID_USER_ID');
+//     if (!email) throw new NotAcceptableException('INVALID_EMAIL');
+//     if (!password) throw new NotAcceptableException('INVALID_PASSWORD');
+//     if (!nickname) throw new NotAcceptableException('INVALID_NICKNAME');
+
+//     this.id = id;
+//     this.email = email.value;
+//     this.password = password.value;
+//     this.nickname = nickname.value;
+//   }
+// }
+
+export class SignupUser {
   email: string;
-  nickname: string;
   password: string;
+  nickname: string;
 
   constructor(email: Email, password: Password, nickname: Nickname) {
     if (!email) throw new NotAcceptableException('INVALID_EMAIL');
@@ -67,6 +91,12 @@ export class User {
     this.email = email.value;
     this.password = password.value;
     this.nickname = nickname.value;
+  }
+
+  async hashPassword(password: Password): Promise<string> {
+    const salt = await bcrypt.genSalt(Number(process.env.SALT_ROUNDS));
+    const pwValue = password.value;
+    return new HashedPassword(await bcrypt.hash(pwValue, salt)).value;
   }
 }
 

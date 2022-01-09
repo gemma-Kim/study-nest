@@ -77,29 +77,17 @@ export class UserController {
     summary: '로그인',
   })
   @Post('login')
-  async logIn(@Body() data: LogInRequestDto): Promise<AccessToken> {
+  async login(@Body() data: LogInRequestDto): Promise<AccessToken> {
     const loginUser = new LoginUser(
       new Email(data.email),
       new Password(data.password),
     );
-
     const user = await this.userService.exists(loginUser);
-
     if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
-
-    await this.authService.validatePassword(
-      new Password(data.password),
-      new Password(user.password),
-    );
-
-    return this.authService.generateAccessToken(
-      new AuthPayload({
-        id: user.id,
-        email: user.email,
-      }),
-    );
+    await this.authService.validatePassword(data.password, user.password);
+    return this.authService.generateAccessToken(user.id, user.email);
   }
 
   @ApiOperation({
@@ -115,8 +103,14 @@ export class UserController {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
 
+    if (updateData.password) {
+      updateData.password = new HashedPassword(
+        await this.authService.hashPassword(new Password(updateData.password)),
+      ).value;
+    }
+
     const updatedUser = await this.userRepository.Update(
-      new UserUpadateCommand(user.id, updateData),
+      new UserUpadateCommand({ id: userId, ...updateData }),
     );
     return new updateUserInfoResponseDto(updatedUser);
   }
