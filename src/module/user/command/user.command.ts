@@ -1,6 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
 import { Email, Nickname, Password } from '../domain/user.domain';
-import { UpdateUserInfoRequestDto } from '../dto/user.request.dto';
 
 export class UserUpadateCommand {
   readonly id: number;
@@ -8,15 +7,28 @@ export class UserUpadateCommand {
   readonly nickname: string;
   readonly password: string;
 
-  constructor(data) {
-    if (!data.id) throw new BadRequestException('DOES_NOT_EXIST_USER_ID');
-    if (!data.email && !data.nickname && !data.password) {
-      throw new BadRequestException('DOES_NOT_EXIST_UPDATE_DATA');
+  constructor(userData: {
+    id: number;
+    email?: string;
+    password?: string;
+    nickname?: string;
+  }) {
+    if (!userData.id) throw new BadRequestException('DOES_NOT_EXIST_USER_ID');
+    if (!userData.email && !userData.password && !userData.nickname)
+      throw new BadRequestException('DOES_NOT_EXIST_USER_UPDATE_DATA');
+
+    this.id = userData.id;
+
+    if (userData.email) {
+      this.email = new Email(userData.email).value;
     }
 
-    this.id = data.id;
-    if (data.email) this.email = new Email(data.email).value;
-    if (data.nickname) this.nickname = new Nickname(data.nickname).value;
-    if (data.password) this.password = new Password(data.password).value;
+    if (userData.nickname) {
+      this.nickname = new Nickname(userData.nickname).value;
+    }
+
+    if (userData.password) {
+      this.password = new Password(userData.password).getHashedPassword();
+    }
   }
 }
