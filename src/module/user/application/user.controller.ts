@@ -11,14 +11,7 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { UserService } from '../domain/user.service';
-import {
-  Email,
-  HashedPassword,
-  LoginUser,
-  Nickname,
-  Password,
-  SignupUser,
-} from '../domain/user.domain';
+import { Email, Password } from '../domain/user.domain';
 import {
   JoinResponseDto,
   updateUserInfoResponseDto,
@@ -30,9 +23,9 @@ import {
 } from '../dto/user.request.dto';
 import { AuthService } from 'src/module/auth/application/auth.service';
 import { UserRepository } from '../repository/user.reposiory';
-import { AuthPayload } from 'src/module/auth/dto/auth.payload.dto';
 import { AccessToken } from 'src/module/auth/domain/auth.domain';
-import { UserUpadateCommand } from '../command/user.command';
+import { UserUpadateCommand } from '../domain/command/user.command';
+import { User } from '../domain/entity/user.entity';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags('user')
@@ -49,28 +42,16 @@ export class UserController {
   })
   @Post('signUp')
   async signUp(@Body() data: SignUpRequestDto): Promise<JoinResponseDto> {
-    const user = new SignupUser(
-      new Email(data.email),
-      new Password(data.password),
-      new Nickname(data.nickname),
-    );
-    const foundUser = await this.userService.exists(user);
+    const newUser = new User();
+    await newUser.setSignUpUser(data.email, data.password, data.nickname);
 
+    const foundUser = await this.userService.exists(newUser);
     if (foundUser) {
       throw new BadRequestException('DUPLICATED_EMAIL_OR_NICKNAME');
     }
 
-    const hashedPassword = new HashedPassword(
-      await this.authService.hashPassword(new Password(user.password)),
-    );
-
-    const signUpedUser = await this.userRepository.Create({
-      email: user.email,
-      password: hashedPassword.value,
-      nickname: user.nickname,
-    });
-
-    return new JoinResponseDto(signUpedUser);
+    const createdUser = await this.userRepository.Create(newUser);
+    return new JoinResponseDto(createdUser);
   }
 
   @ApiOperation({
@@ -78,15 +59,13 @@ export class UserController {
   })
   @Post('login')
   async login(@Body() data: LogInRequestDto): Promise<AccessToken> {
-    const loginUser = new LoginUser(
-      new Email(data.email),
-      new Password(data.password),
-    );
+    const loginUser = new User().setLoginUser(data.email, data.password);
+
     const user = await this.userService.exists(loginUser);
     if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
-    await this.authService.validatePassword(data.password, user.password);
+    await this.authService.validatePassword(loginUser.password, user.password);
     return this.authService.generateAccessToken(user.id, user.email);
   }
 
@@ -101,12 +80,6 @@ export class UserController {
     const user = await this.userService.exists({ id: userId });
     if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
-    }
-
-    if (updateData.password) {
-      updateData.password = new HashedPassword(
-        await this.authService.hashPassword(new Password(updateData.password)),
-      ).value;
     }
 
     const updatedUser = await this.userRepository.Update(

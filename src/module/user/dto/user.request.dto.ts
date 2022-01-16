@@ -1,4 +1,5 @@
 import { IsOptional, IsString } from 'class-validator';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class SignUpRequestDto {
   @IsString()
@@ -18,8 +19,6 @@ export class LogInRequestDto {
   @IsString()
   public readonly password: string;
 }
-
-import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateUserInfoRequestDto {
   @ApiProperty({
