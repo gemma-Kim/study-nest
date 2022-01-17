@@ -1,5 +1,9 @@
 import { BadRequestException } from '@nestjs/common';
-import { Email, Nickname, Password } from '../domain/user.domain';
+import {
+  Email,
+  Nickname,
+  Password,
+} from '../domain/value-object/user.value-object';
 
 export class UserUpadateCommand {
   readonly id: number;
@@ -13,9 +17,12 @@ export class UserUpadateCommand {
     password?: string;
     nickname?: string;
   }) {
-    if (!userData.id) throw new BadRequestException('DOES_NOT_EXIST_USER_ID');
-    if (!userData.email && !userData.password && !userData.nickname)
+    if (!userData.id) {
+      throw new BadRequestException('DOES_NOT_EXIST_USER_ID');
+    }
+    if (!userData.email && !userData.password && !userData.nickname) {
       throw new BadRequestException('DOES_NOT_EXIST_USER_UPDATE_DATA');
+    }
 
     this.id = userData.id;
 
@@ -28,7 +35,9 @@ export class UserUpadateCommand {
     }
 
     if (userData.password) {
-      this.password = new Password(userData.password).getHashedPassword();
+      const password = new Password(userData.password);
+      password.hashPassword();
+      this.password = password.value;
     }
   }
 }
