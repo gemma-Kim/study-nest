@@ -1,37 +1,22 @@
-import { genSalt, hash, compare } from 'bcrypt';
 import { AuthPayload } from '../dto/auth.payload.dto';
-import { Password } from 'src/module/user/domain/user.domain';
 import { AccessToken } from '../domain/auth.domain';
 import { JwtService } from '@nestjs/jwt';
+import * as bcrypt from 'bcrypt';
 import { BadRequestException, Injectable } from '@nestjs/common';
 
 @Injectable()
 export class AuthService {
   constructor(private jwtService: JwtService) {}
 
-  generateAccessToken(payloadData: AuthPayload) {
-    const payload = {
-      userId: payloadData.id,
-      email: payloadData.email,
-    };
-
+  generateAccessToken(userId: number, email: string): AccessToken {
+    const payload = new AuthPayload({
+      userId,
+      email,
+    });
     return new AccessToken(this.jwtService.sign(payload));
-  }
-
-  async hashPassword(password: Password) {
-    const saltRounds: number = Number(process.env.SALT_ROUNDS);
-    const salt = await genSalt(saltRounds);
-    return hash(password.value, salt);
   }
 
   async validate(tokenData: AccessToken) {
     await this.jwtService.verify(tokenData.accessToken);
-  }
-
-  async validatePassword(notSurePassword: Password, validPassword: Password) {
-    const passwordIsSame = compare(notSurePassword.value, validPassword.value);
-    if (!passwordIsSame) {
-      throw new BadRequestException('WRONG_PASSWORD');
-    }
   }
 }
