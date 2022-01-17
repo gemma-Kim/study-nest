@@ -11,7 +11,6 @@ import {
 import { ApiOperation, ApiTags } from '@nestjs/swagger';
 import { UndefinedToNullInterceptor } from 'src/common/interceptor/undefinedToNull.interceptor';
 import { UserService } from '../domain/user.service';
-import { Email, Password } from '../domain/user.domain';
 import {
   JoinResponseDto,
   updateUserInfoResponseDto,
@@ -24,7 +23,7 @@ import {
 import { AuthService } from 'src/module/auth/application/auth.service';
 import { UserRepository } from '../repository/user.reposiory';
 import { AccessToken } from 'src/module/auth/domain/auth.domain';
-import { UserUpadateCommand } from '../domain/command/user.command';
+import { UserUpadateCommand } from '../command/user.command';
 import { User } from '../domain/entity/user.entity';
 
 @UseInterceptors(UndefinedToNullInterceptor)
@@ -42,8 +41,11 @@ export class UserController {
   })
   @Post('signUp')
   async signUp(@Body() data: SignUpRequestDto): Promise<JoinResponseDto> {
-    const newUser = new User();
-    await newUser.setSignUpUser(data.email, data.password, data.nickname);
+    const newUser = await new User().getSignUpUser(
+      data.email,
+      data.password,
+      data.nickname,
+    );
 
     const foundUser = await this.userService.exists(newUser);
     if (foundUser) {
@@ -59,13 +61,13 @@ export class UserController {
   })
   @Post('login')
   async login(@Body() data: LogInRequestDto): Promise<AccessToken> {
-    const loginUser = new User().setLoginUser(data.email, data.password);
+    const user = new User().getLoginUser(data.email, data.password);
+    const foundUser = await this.userService.exists(user);
 
-    const user = await this.userService.exists(loginUser);
-    if (!user) {
+    if (!foundUser) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
-    await this.authService.validatePassword(loginUser.password, user.password);
+    await user.checkPassword(user.password);
     return this.authService.generateAccessToken(user.id, user.email);
   }
 
