@@ -12,7 +12,7 @@ import {
 @Entity('user')
 export class UserOrmEntity extends BaseEntity {
   @PrimaryGeneratedColumn()
-  readonly id: number;
+  id: number;
 
   @Column()
   email: string;
@@ -24,13 +24,13 @@ export class UserOrmEntity extends BaseEntity {
   password: string;
 
   @CreateDateColumn()
-  readonly createAt: string;
+  createAt: string;
 
   @UpdateDateColumn()
-  readonly updateAt: string;
+  updateAt: string;
 
   @OneToMany(() => UserOrmEntity, (user) => user.profileId)
-  readonly profileId: Profile[];
+  profileId: Profile[];
 
   constructor() {
     super();

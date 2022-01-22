@@ -5,32 +5,49 @@ import {
   TransactionManager,
 } from 'typeorm';
 import { UserUpadateCommand } from '../command/user.command';
-import { User } from '../entity/user.entity';
+import { UserOrmEntity } from './user.orm.entity';
+import { User } from '../domain/entity/user.entity';
 
 export interface IUserRepository {
-  Find: (obj) => Promise<User>;
-  Create: (saveData, entityManager?: EntityManager) => Promise<User>;
+  Find: (data) => Promise<User>;
+  Create: (
+    saveData: { email: string; nickname: string; password: string },
+    entityManager?: EntityManager,
+  ) => Promise<UserOrmEntity>;
   Update: (
     updateData: UserUpadateCommand,
     entityManager?: EntityManager,
-  ) => Promise<User>;
+  ) => Promise<UserOrmEntity>;
 }
 
-@EntityRepository(User)
+@EntityRepository(UserOrmEntity)
 export class UserRepository
-  extends Repository<User>
+  extends Repository<UserOrmEntity>
   implements IUserRepository
 {
-  async Create(saveData, @TransactionManager() entityManager?: EntityManager) {
+  async Create(
+    saveData: { email: string; nickname: string; password: string },
+    @TransactionManager() entityManager?: EntityManager,
+  ): Promise<UserOrmEntity> {
     if (entityManager) {
-      return await entityManager.save(User, saveData);
+      return await entityManager.save(UserOrmEntity, saveData);
     } else {
       return await this.save(saveData);
     }
   }
 
-  async Find(data) {
-    return await this.findOne(data);
+  async Find(data): Promise<User> {
+    const userData = await this.findOne(data);
+
+    if (userData) {
+      const user = new User(
+        userData.id,
+        userData.email,
+        userData.nickname,
+        userData.password,
+      );
+      return user;
+    }
   }
 
   async Update(
@@ -38,7 +55,7 @@ export class UserRepository
     @TransactionManager() entityManager?: EntityManager,
   ) {
     if (entityManager) {
-      return await entityManager.save(User, updateData);
+      return await entityManager.save(UserOrmEntity, updateData);
     } else {
       return await this.save(updateData);
     }
