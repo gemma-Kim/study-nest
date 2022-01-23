@@ -1,90 +1,55 @@
-import { Profile } from 'src/module/profile/domain/entity/profile.entity';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import * as bcrypt from 'bcrypt';
+import { BadRequestException } from '@nestjs/common';
+import { Email, Nickname, Password } from '../value-object/user.value-object';
 
-import {
-  Email,
-  HashedPassword,
-  LoginUser,
-  Nickname,
-  Password,
-  SignupUser,
-} from '../user.domain';
-
-// @Entity('user')
-// export class User {
-//   @PrimaryGeneratedColumn()
-//   id: number;
-
-//   @Column()
-//   email: string;
-
-//   @Column()
-//   nickname: string;
-
-//   @Column()
-//   password: string;
-
-//   @CreateDateColumn()
-//   createAt: string;
-
-//   @UpdateDateColumn()
-//   updateAt: string;
-
-//   @OneToMany(() => User, (user) => user.profileId)
-//   profileId: Profile[];
-// }
-
-@Entity('user')
-export class User extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  readonly id: number;
-
-  @Column()
-  readonly email: string;
-
-  @Column()
-  readonly nickname: string;
-
-  @Column()
-  readonly password: string;
-
-  @CreateDateColumn()
-  readonly createAt: string;
-
-  @UpdateDateColumn()
-  readonly updateAt: string;
-
-  @OneToMany(() => User, (user) => user.profileId)
-  readonly profileId: Profile[];
+export class User {
+  protected id: number;
+  protected email: string;
+  protected nickname: string;
+  protected password: string;
 
   constructor() {
-    super();
+    // if (!this.id || !this.email || !this.nickname || !this.password) {
+    //   throw new BadRequestException();
+    // }
   }
 
-  async setSignUpUser(
-    theEmail: string,
-    thePassword: string,
-    theNickname: string,
-  ): Promise<SignupUser> {
-    const password = new Password(thePassword);
-    await password.hashPassword();
-
-    return new SignupUser(
-      new Email(theEmail).value,
-      password.value,
-      new Nickname(theNickname).value,
-    );
+  set _id(id: number) {
+    this.id = id;
   }
 
-  setLoginUser(theEmail: string, thePassword: string) {
-    return new LoginUser(theEmail, thePassword);
+  get _id() {
+    return this.id;
+  }
+
+  set _email(email: string) {
+    this.email = new Email(email).value;
+  }
+
+  // get _email() {
+  //   return this.email;
+  // }
+
+  set _nickname(nickname: string) {
+    this.nickname = new Nickname(nickname).value;
+  }
+
+  // get _nickname() {
+  //   return this.nickname;
+  // }
+
+  set _password(password: string) {
+    this.password = new Password(password).value;
+  }
+
+  // get _password() {
+  //   return this.password;
+  // }
+
+  async checkPassword(validPassword: string) {
+    const passwordIsSame = await bcrypt.compare(this.password, validPassword);
+    if (!passwordIsSame) {
+      throw new BadRequestException('WRONG_PASSWORD');
+    }
   }
 }
