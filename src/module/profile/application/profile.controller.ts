@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -7,46 +8,57 @@ import {
   ParseIntPipe,
   Patch,
   Post,
-  UseFilters,
 } from '@nestjs/common';
-import { NewProfileResponseDto } from './dto/getProfile.response.dto';
-import { NewProfileRequestDto } from './dto/newProfile.request.dto';
-import { RequestUpdateProfileDto } from './dto/updateUserProfile.dto';
-import { Gender, Photo, Profile, UserProfile } from './domain/profile.domain';
+import { ProfileResponseDto } from '../dto/profile.response.dto';
 import { ProfileService } from './profile.service';
-import { HttpExceptionFilter } from 'src/common/filter/http-exception.filter';
-import { ProfileRepository } from './repository/profile.repository';
+import { ProfileRepository } from '../repository/profile.repository';
+import {
+  CreateProfileRequestDto,
+  RequestUpdateProfileDto,
+  SearchProfileRequestDto,
+} from '../dto/profile.request.dto';
+import { UserService } from 'src/module/user/domain/user.service';
+import { UpdateProfileCommand } from '../domain/command/updateProfile.command';
+import { Profile } from '../domain/entity/profile.entity';
+import { Gender, Photo } from '../domain/value-object/profile.value-object';
 
 @Controller('profile')
 export class ProfileController {
   constructor(
     private readonly profileService: ProfileService,
     private readonly profileRepository: ProfileRepository,
+    private readonly userService: UserService,
   ) {}
 
   @Post(':userId')
-  async addProfile(
+  async createProfile(
     @Param('userId', ParseIntPipe) userId: number,
-    @Body() profileData: NewProfileRequestDto,
+    @Body() profileData: CreateProfileRequestDto,
   ) {
-    const profile = new Profile(
-      new Gender(profileData.gender),
-      new Photo(profileData.photo),
-    );
+    const user = await this.userService.exists({ id: userId });
+    if (!user) {
+      throw new NotFoundException('DOES_NOT_EXIST_USER');
+    }
 
-    const userProfile = new UserProfile(userId, profile);
+    const profile = new Profile();
+    profile.setNewProfile(userId, profileData.photo, profileData.gender);
+    const savedProfile = await this.profileRepository.Create(profile);
 
-    return await this.profileRepository.createNewProfile(userProfile);
+    return new ProfileResponseDto(savedProfile);
   }
 
   @Get(':profileId')
   async getProfile(@Param('profileId', ParseIntPipe) profileId: number) {
-    const profile = await this.profileRepository.getOneById(profileId);
+    const profile = await this.profileService.exists(profileId);
     if (!profile) {
       throw new NotFoundException('PROFILE_DOEST_NOT_EXIST');
     }
+    return new ProfileResponseDto(profile);
+  }
 
-    return new NewProfileResponseDto(profile);
+  @Get()
+  async searchProfiles(@Param() searchParamData: SearchProfileRequestDto) {
+    await this.profileService.findProfiles(searchParamData);
   }
 
   @Patch(':profileId')
@@ -54,8 +66,16 @@ export class ProfileController {
     @Param('profileId') profileId: number,
     @Body() updateData: RequestUpdateProfileDto,
   ) {
-    await this.profileService.exists(profileId);
-    await this.profileService.updateProfile(profileId, updateData);
+    const profile = await this.profileService.exists(profileId);
+    if (!profile) {
+      throw new BadRequestException('DOES_NOT_EXIST_PROFILE');
+    }
+    const updateCommand = new UpdateProfileCommand(
+      profileId,
+      updateData.photo,
+      updateData.gender,
+    );
+    await this.profileRepository.Update(updateCommand);
     return { result: 'SUCCESS' };
   }
 }
