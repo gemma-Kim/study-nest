@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   NotFoundException,
@@ -23,8 +22,12 @@ import {
 import { AuthService } from 'src/module/auth/application/auth.service';
 import { UserRepository } from '../repository/user.reposiory';
 import { AccessToken } from 'src/module/auth/domain/auth.domain';
-import { UserUpadateCommand } from '../command/user.command';
-import { User } from '../domain/entity/user.entity';
+import { UserCreateCommand, UserUpadateCommand } from '../command/user.command';
+import {
+  Email,
+  Nickname,
+  Password,
+} from '../domain/value-object/user.value-object';
 
 @UseInterceptors(UndefinedToNullInterceptor)
 @ApiTags('user')
@@ -41,19 +44,16 @@ export class UserController {
   })
   @Post('signUp')
   async signUp(@Body() data: SignUpRequestDto): Promise<JoinResponseDto> {
-    const newUser = await new User().getSignUpUser(
-      data.email,
-      data.password,
-      data.nickname,
+    const password = new Password(data.password);
+    await password.hash();
+
+    const userCreateCommand = new UserCreateCommand(
+      new Email(data.email).value,
+      password.value,
+      new Nickname(data.nickname).value,
     );
 
-    const foundUser = await this.userService.exists(newUser);
-    if (foundUser) {
-      throw new BadRequestException('DUPLICATED_EMAIL_OR_NICKNAME');
-    }
-
-    const createdUser = await this.userRepository.Create(newUser);
-    return new JoinResponseDto(createdUser);
+    return await this.userService.createUser(userCreateCommand);
   }
 
   @ApiOperation({
@@ -61,14 +61,13 @@ export class UserController {
   })
   @Post('login')
   async login(@Body() data: LogInRequestDto): Promise<AccessToken> {
-    const user = new User().getLoginUser(data.email, data.password);
-    const foundUser = await this.userService.exists(user);
-
-    if (!foundUser) {
+    const user = await this.userService.exists({ email: data.email });
+    if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
-    await user.checkPassword(user.password);
-    return this.authService.generateAccessToken(user.id, user.email);
+
+    await user.checkPassword(data.password);
+    return this.authService.generateAccessToken(user.id, data.email);
   }
 
   @ApiOperation({
@@ -83,9 +82,10 @@ export class UserController {
     if (!user) {
       throw new NotFoundException('DOES_NOT_EXIST_USER');
     }
+    user.updateInfo(updateData);
 
     const updatedUser = await this.userRepository.Update(
-      new UserUpadateCommand({ id: userId, ...updateData }),
+      new UserUpadateCommand(user),
     );
     return new updateUserInfoResponseDto(updatedUser);
   }
