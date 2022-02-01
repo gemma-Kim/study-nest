@@ -84,9 +84,8 @@ export class UserController {
     }
     user.updateInfo(updateData);
 
-    const updatedUser = await this.userRepository.Update(
-      new UserUpadateCommand(user),
+    return await this.userService.updateUser(
+      new UserUpadateCommand(user.id, user.email, user.password, user.nickname),
     );
-    return new updateUserInfoResponseDto(updatedUser);
   }
 }
