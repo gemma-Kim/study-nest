@@ -14,3 +14,5 @@ export class Photo {
     this.value = value;
   }
 }
+
+export class setAndGetCreateProfileDto {}

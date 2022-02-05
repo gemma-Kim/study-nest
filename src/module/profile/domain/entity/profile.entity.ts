@@ -1,34 +1,35 @@
-import { User } from 'src/module/user/entity/user.entity';
-import {
-  BaseEntity,
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
-} from 'typeorm';
+import { CreateProfileRequestDto } from '../../dto/profile.request.dto';
+import { genderType } from '../../type/profile.type';
+import { Gender, Photo } from '../value-object/profile.value-object';
 
-@Entity('profile')
-export class Profile extends BaseEntity {
-  @PrimaryGeneratedColumn()
-  id: number;
+export class Profile {
+  protected id: number;
 
-  @Column()
-  photo: string | null;
-
-  @Column()
-  gender: 'WOMAN' | 'MAN' | null;
-
-  @CreateDateColumn()
-  createAt: string;
-
-  @UpdateDateColumn()
-  updateAt: string;
-
-  @Column()
-  @JoinColumn({ name: 'id', referencedColumnName: 'id' })
-  @ManyToOne(() => User, (user) => user.profileId)
   userId: number;
+
+  photo: string;
+
+  gender: genderType;
+
+  // set _id(id: number) {
+  //   this.id = id;
+  // }
+
+  // set _userId(userId: number) {
+  //   this.userId = userId;
+  // }
+
+  // set _photo(photo: string) {
+  //   this.photo = new Photo(photo).value;
+  // }
+
+  // set _gender(gender: genderType) {
+  //   this.gender = new Gender(gender).value;
+  // }
+
+  setNewProfile(userId: number, photo: string, gender: genderType) {
+    this.userId = userId;
+    this.photo = new Photo(photo).value;
+    this.gender = new Gender(gender).value;
+  }
 }

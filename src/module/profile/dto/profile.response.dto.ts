@@ -1,4 +1,4 @@
-import { Profile } from '../domain/entity/profile.entity';
+import { ProfileOrmEntity } from '../repository/profile.orm.entity';
 
 export class ProfileResponseDto {
   readonly id: number;
@@ -7,7 +7,7 @@ export class ProfileResponseDto {
   readonly gender: null | 'MAN' | 'WOMAN';
   readonly createAt: string;
 
-  constructor(profileData: Profile) {
+  constructor(profileData: ProfileOrmEntity) {
     this.id = profileData.id;
     this.userId = profileData.userId;
     this.photo = profileData.photo;

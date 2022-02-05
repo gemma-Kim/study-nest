@@ -56,10 +56,10 @@ export class ProfileController {
     return new ProfileResponseDto(profile);
   }
 
-  @Get()
-  async searchProfiles(@Param() searchParamData: SearchProfileRequestDto) {
-    await this.profileService.findProfiles(searchParamData);
-  }
+  // @Get()
+  // async searchProfiles(@Param() searchParamData: SearchProfileRequestDto) {
+  //   await this.profileService.findProfiles(searchParamData);
+  // }
 
   @Patch(':profileId')
   async updateProfile(
