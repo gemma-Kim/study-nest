@@ -4,14 +4,15 @@ import {
   Repository,
   TransactionManager,
 } from 'typeorm';
-import { UserUpadateCommand } from '../command/user.command';
+import { UserCreateCommand, UserUpadateCommand } from '../command/user.command';
 import { UserOrmEntity } from './user.orm.entity';
 import { User } from '../domain/entity/user.entity';
+import { FindUserDto } from '../dto/user.dto';
 
 export interface IUserRepository {
-  Find: (data) => Promise<User>;
+  FindOne: (data: FindUserDto) => Promise<User>;
   Create: (
-    saveData: { email: string; nickname: string; password: string },
+    saveData: UserCreateCommand,
     entityManager?: EntityManager,
   ) => Promise<UserOrmEntity>;
   Update: (
@@ -26,7 +27,7 @@ export class UserRepository
   implements IUserRepository
 {
   async Create(
-    saveData: { email: string; nickname: string; password: string },
+    saveData: UserCreateCommand,
     @TransactionManager() entityManager?: EntityManager,
   ): Promise<UserOrmEntity> {
     if (entityManager) {
@@ -36,8 +37,10 @@ export class UserRepository
     }
   }
 
-  async Find(data): Promise<User> {
-    const userData = await this.findOne(data);
+  async FindOne(data: FindUserDto): Promise<User> {
+    const userData: UserOrmEntity = await this.createQueryBuilder()
+      .where(data)
+      .getOne();
 
     if (userData) {
       const user = new User(
